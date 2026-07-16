@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Khayal — AI Styling App</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root{
+    --gold:#b7913a;
+    --gold-light:#e8c876;
+    --sand:#f4ecdd;
+    --ink:#1c1a17;
+    --panel:#fffdf8;
+    --line:#e4d7b8;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    background:linear-gradient(180deg,var(--sand),#efe4cc 400px,#f7f2e6 100%);
+    color:var(--ink);
+    min-height:100vh;
+  }
+  header{ padding:36px 24px 20px; text-align:center; }
+  header h1{ font-size:2.2rem; margin:0 0 6px; letter-spacing:.5px; }
+  header .ar{ color:var(--gold); font-weight:600; }
+  header p{ margin:0 auto; max-width:640px; color:#5c5548; font-size:.95rem; line-height:1.5; }
+  .wrap{ max-width:1020px; margin:0 auto; padding:0 20px 60px; display:grid; grid-template-columns:340px 1fr; gap:24px; }
+  @media (max-width:800px){ .wrap{ grid-template-columns:1fr; } }
+  .card{ background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:22px; box-shadow:0 2px 10px rgba(90,70,20,.05); }
+  .card h2{ font-size:1.05rem; margin:0 0 14px; border-bottom:1px solid var(--line); padding-bottom:10px; }
+  label{ display:block; font-size:.8rem; font-weight:600; color:#6b6250; margin:14px 0 5px; }
+  input[type=number], input[type=text], select{
+    width:100%; padding:9px 10px; border:1px solid var(--line); border-radius:8px; font-size:.9rem; background:#fff;
+  }
+  .row2{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .photo-drop{
+    margin-top:14px; border:1.5px dashed var(--gold); border-radius:10px; padding:16px;
+    text-align:center; cursor:pointer; background:#fbf6ea;
+  }
+  .photo-drop img{ max-width:100%; max-height:160px; border-radius:8px; margin-top:8px; }
+  .photo-drop .hint{ font-size:.78rem; color:#8a7f68; margin-top:6px; }
+  .toggle-row{ display:flex; align-items:center; gap:8px; margin-top:14px; }
+  .toggle-row input{ width:auto; }
+  .toggle-row label{ margin:0; font-size:.85rem; }
+  button.primary{
+    width:100%; margin-top:20px; padding:12px; background:var(--ink); color:#fff; border:none;
+    border-radius:9px; font-size:.95rem; font-weight:600; cursor:pointer; letter-spacing:.3px;
+  }
+  button.primary:disabled{ opacity:.5; cursor:default; }
+  button.primary:hover:not(:disabled){ background:#000; }
+  .status{ margin-top:12px; font-size:.82rem; color:#6b6250; min-height:18px; }
+  .status.err{ color:#a1341f; }
+  .notes-box{
+    background:#fbf6ea; border:1px solid var(--line); border-radius:10px; padding:14px 16px;
+    font-size:.85rem; color:#4d4636; line-height:1.5;
+  }
+  .outfit-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:18px; margin-top:16px; }
+  .outfit-card{ background:var(--panel); border:1px solid var(--line); border-radius:12px; overflow:hidden; }
+  .compare{ display:grid; grid-template-columns:1fr 2fr; gap:1px; background:var(--line); }
+  .compare .cell{ background:#efe6d2; aspect-ratio:3/4; display:flex; align-items:center; justify-content:center; overflow:hidden; }
+  .compare .cell img{ width:100%; height:100%; object-fit:cover; }
+  .compare .cell span{ font-size:.68rem; color:#9a8f76; padding:6px; text-align:center; }
+  .compare-caption{ display:grid; grid-template-columns:1fr 2fr; font-size:.66rem; color:#9a8f76; text-align:center; padding:4px 0; background:var(--panel); }
+  .outfit-body{ padding:12px 14px 16px; }
+  .outfit-body h3{ margin:0 0 4px; font-size:.98rem; }
+  .badge-row{ display:flex; gap:6px; flex-wrap:wrap; margin:6px 0; }
+  .badge{ font-size:.68rem; background:var(--sand); border:1px solid var(--line); color:#7a6a3a; padding:2px 8px; border-radius:20px; }
+  .reason{ font-size:.8rem; color:#6b6250; margin-top:6px; line-height:1.4; }
+  .shop-links{ display:flex; flex-wrap:wrap; gap:6px; margin-top:10px; }
+  .shop-links a{
+    font-size:.72rem; text-decoration:none; color:var(--ink); background:var(--sand);
+    border:1px solid var(--line); padding:5px 10px; border-radius:20px;
+  }
+  .shop-links a:hover{ background:var(--gold-light); }
+  .empty-state{ text-align:center; padding:60px 20px; color:#9a8f76; font-size:.9rem; }
+  details.about{ margin-top:16px; font-size:.8rem; color:#6b6250; }
+  details.about summary{ cursor:pointer; font-weight:600; color:#4d4636; }
+  details.about p{ line-height:1.5; }
+  .footer-note{ text-align:center; font-size:.75rem; color:#9a8f76; margin-top:30px; padding:0 20px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Khayal <span class="ar">خيال</span></h1>
+  <p>An AI styling app for a Dubai closet-app concept. Your own photo is edited into each outfit (face kept, clothing changed) so you can actually see yourself in the look. No mall publishes a live public inventory API, so instead of guessing, each pick links straight to a live search on real UAE retailers.</p>
+</header>
+
+<div class="wrap">
+
+  <div class="card">
+    <h2>Your details</h2>
+
+    <label>Your photo (this is the photo that gets restyled — keep your face visible and well-lit)</label>
+    <div class="photo-drop" id="photoDrop">
+      <span id="photoHint">Click to choose a photo</span>
+      <div class="hint">JPG or PNG only — not HEIC (default iPhone format)</div>
+    </div>
+    <input type="file" id="photoInput" accept="image/png,image/jpeg,image/webp" style="display:none">
+    <div class="status err" id="photoErr"></div>
+
+    <div class="row2">
+      <div>
+        <label>Height (cm)</label>
+        <input type="number" id="height" value="168">
+      </div>
+      <div>
+        <label>Weight (kg)</label>
+        <input type="number" id="weight" value="60">
+      </div>
+    </div>
+
+    <div class="row2">
+      <div>
+        <label>Age</label>
+        <input type="number" id="age" value="17">
+      </div>
+      <div>
+        <label>Style lean</label>
+        <select id="stylePref">
+          <option value="trend-forward streetwear">Streetwear</option>
+          <option value="minimal chic">Minimal / Chic</option>
+          <option value="modest fashion">Modest fashion</option>
+          <option value="glam evening">Glam / Evening</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="toggle-row">
+      <input type="checkbox" id="modestOnly">
+      <label for="modestOnly">Only suggest modest-fit outfits</label>
+    </div>
+
+    <button class="primary" id="styleBtn">Style me →</button>
+    <div class="status" id="statusMsg"></div>
+
+    <details class="about">
+      <summary>About this app</summary>
+      <p>Two real AI calls happen when you click "Style me." First, a vision model looks at your photo, age, and measurements and invents 3 outfit concepts suited to current trends — it's instructed never to comment on your body, only on proportions relevant to fit, the way a tailor would. Second, an image-editing model takes your actual uploaded photo and edits the clothing onto it directly, keeping your face and pose — that's the "doll" preview, except it's really you. Because Dubai malls don't expose live public stock APIs, each outfit links out to a real, live search on Namshi, Zara UAE, Ounass, H&M UAE, and SHEIN UAE so you can check current price and stock yourself. Your photo and API key never leave your computer except straight to OpenAI, via the local server you're running.</p>
+    </details>
+  </div>
+
+  <div class="card">
+    <h2>Recommendations</h2>
+    <div id="results">
+      <div class="empty-state">Fill in your details and click "Style me" to generate outfit picks.</div>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer-note">Shop links go to live retailer search results, not a fixed catalog — always check current price and stock on the retailer's own site before buying. · <a href="/logout" style="color:inherit;">Log out</a></div>
+
+<script>
+// ---------- Real UAE online retailers (no public inventory APIs exist, so we link to live search instead) ----------
+const RETAILERS = [
+  { name: "Namshi",   build: q => `https://www.namshi.com/uae-en/search?q=${encodeURIComponent(q)}` },
+  { name: "Zara UAE",  build: q => `https://www.zara.com/ae/en/search?searchTerm=${encodeURIComponent(q)}&section=WOMAN` },
+  { name: "Ounass",   build: q => `https://www.ounass.ae/search?q=${encodeURIComponent(q)}` },
+  { name: "H&M UAE",  build: q => `https://www2.hm.com/en_ae/search-results.html?q=${encodeURIComponent(q)}` },
+  { name: "SHEIN UAE", build: q => `https://ae.shein.com/pdsearch/${encodeURIComponent(q)}/` },
+];
+
+// ---------- Elements ----------
+const photoDrop = document.getElementById('photoDrop');
+const photoInput = document.getElementById('photoInput');
+const photoErr = document.getElementById('photoErr');
+const styleBtn = document.getElementById('styleBtn');
+const statusMsg = document.getElementById('statusMsg');
+const results = document.getElementById('results');
+
+let photoBase64 = null;
+let photoMime = null;
+let photoDataUrl = null;
+
+const SUPPORTED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
+
+photoDrop.addEventListener('click', () => photoInput.click());
+photoInput.addEventListener('change', () => {
+  photoErr.textContent = '';
+  const f = photoInput.files[0];
+  if (!f) return;
+
+  const isHeicByName = /\.(heic|heif)$/i.test(f.name);
+  if (isHeicByName || !SUPPORTED_TYPES.includes(f.type)) {
+    photoErr.textContent = `That file (${f.type || 'unknown type'}) isn't supported. Please use a JPG or PNG — if it's an iPhone photo, ` +
+      `open it in Photos, tap Share → "Save as JPEG"/screenshot it, then upload that instead.`;
+    photoBase64 = null;
+    return;
+  }
+
+  photoMime = f.type;
+  const reader = new FileReader();
+  reader.onerror = () => { photoErr.textContent = 'Could not read that file — try a different photo.'; };
+  reader.onload = (e) => {
+    photoDataUrl = e.target.result;
+    photoBase64 = photoDataUrl.split(',')[1];
+    photoDrop.innerHTML = `<img src="${photoDataUrl}"><div class="hint">${escapeHtml(f.name)}</div>`;
+  };
+  reader.readAsDataURL(f);
+});
+
+window.addEventListener('error', (e) => {
+  setStatus('Unexpected error: ' + e.message, true);
+});
+
+function setStatus(msg, isErr) {
+  statusMsg.textContent = msg || "";
+  statusMsg.className = "status" + (isErr ? " err" : "");
+}
+
+async function styleMe() {
+  const height = document.getElementById('height').value;
+  const weight = document.getElementById('weight').value;
+  const age = document.getElementById('age').value;
+  const stylePref = document.getElementById('stylePref').value;
+  const modestOnly = document.getElementById('modestOnly').checked;
+
+  if (!photoBase64) { setStatus("Add a photo first.", true); return; }
+
+  styleBtn.disabled = true;
+  setStatus("Analyzing your photo and generating outfit concepts…");
+  results.innerHTML = `<div class="empty-state">Thinking…</div>`;
+
+  try {
+    const styleResp = await fetch('/api/style', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ photoBase64, photoMime, height, weight, age, stylePref, modestOnly })
+    });
+
+    if (!styleResp.ok) throw new Error(await styleResp.text());
+    const styleData = await styleResp.json();
+    const picks = (styleData.picks || []).slice(0, 3);
+
+    if (!picks.length) {
+      results.innerHTML = `<div class="empty-state">No concepts came back — try again.</div>`;
+      setStatus("");
+      styleBtn.disabled = false;
+      return;
+    }
+
+    results.innerHTML = `
+      <div class="notes-box"><strong>Fit notes:</strong> ${escapeHtml(styleData.bodyNotes || "")}</div>
+      <div class="outfit-grid" id="outfitGrid"></div>
+    `;
+    const grid = document.getElementById('outfitGrid');
+
+    picks.forEach((pick, idx) => {
+      const cardId = `outfit-${idx}`;
+      const shopLinks = RETAILERS.map(r =>
+        `<a href="${r.build(pick.searchKeywords || pick.name)}" target="_blank" rel="noopener">${r.name} ↗</a>`
+      ).join('');
+
+      const card = document.createElement('div');
+      card.className = 'outfit-card';
+      card.innerHTML = `
+        <div class="compare">
+          <div class="cell"><img src="${photoDataUrl}" alt="your photo"></div>
+          <div class="cell" id="img-${cardId}"><span>Generating your try-on…</span></div>
+        </div>
+        <div class="compare-caption"><span>Your photo</span><span>AI-generated preview (edited, not real)</span></div>
+        <div class="outfit-body">
+          <h3>${escapeHtml(pick.name || "Outfit idea")}</h3>
+          <div class="badge-row">
+            <span class="badge">${escapeHtml(pick.category || "")}</span>
+            ${modestOnly ? '<span class="badge">modest</span>' : ''}
+          </div>
+          <div class="reason">${escapeHtml(pick.reason || pick.description || "")}</div>
+          <div class="shop-links">${shopLinks}</div>
+        </div>
+      `;
+      grid.appendChild(card);
+
+      generateTryOn(pick, styleData.bodyNotes).then(b64 => {
+        const wrap = document.getElementById(`img-${cardId}`);
+        if (wrap && b64) wrap.innerHTML = `<img src="data:image/png;base64,${b64}" alt="${escapeHtml(pick.name)}">`;
+        else if (wrap) wrap.innerHTML = `<span>Render failed — try again</span>`;
+      });
+    });
+
+    setStatus("Done. Try-on renders are loading in below.");
+  } catch (err) {
+    console.error(err);
+    let detail = err.message || String(err);
+    try {
+      const parsed = JSON.parse(detail);
+      detail = parsed.detail || parsed.error || detail;
+    } catch (_) { /* not JSON, use as-is */ }
+
+    const isFileProtocol = window.location.protocol === 'file:';
+    const isLocalHost = ['localhost', '127.0.0.1'].includes(window.location.hostname);
+    const looksLikeNetworkFail = /Failed to fetch|NetworkError|Load failed/i.test(detail);
+    setStatus(looksLikeNetworkFail ? "Can't reach the server." : "Request failed.", true);
+
+    const fileMsg = `You opened this file directly (the address bar shows a <code>file://</code> path), so it can't reach any server — that only works when you view it through a running server's URL. Either open <code>http://localhost:8787</code> after running <code>python3 khayal_proxy.py</code> in Terminal, or open your deployed Render URL (something like <code>https://your-app.onrender.com</code>) instead of this local file.`;
+    const localMsg = `Couldn't reach <code>localhost:8787</code>. Make sure Terminal still shows "Khayal running at http://localhost:8787" — if you closed that window, run <code>python3 khayal_proxy.py</code> again and keep it open.`;
+    const hostedMsg = `Couldn't reach the server at <code>${escapeHtml(window.location.host)}</code>. If you just deployed this, free-tier hosts (like Render) sleep after inactivity and can take 30-60 seconds to wake up — wait a bit and try again. If it keeps failing, check your host's dashboard for a "Logs" tab and look for a startup error (common cause: <code>OPENAI_API_KEY</code> not set in the environment variables).`;
+
+    results.innerHTML = `
+      <div class="empty-state">
+        <strong style="color:#a1341f;">Something went wrong</strong><br><br>
+        ${looksLikeNetworkFail
+          ? (isFileProtocol ? fileMsg : (isLocalHost ? localMsg : hostedMsg))
+          : escapeHtml(detail)}
+      </div>`;
+  } finally {
+    styleBtn.disabled = false;
+  }
+}
+
+async function generateTryOn(pick, bodyNotes) {
+  const prompt = `Change only this person's outfit to: ${pick.description}. Keep their face, hair, skin tone, body proportions, pose, and the background exactly as in the original photo — this must still clearly look like the same person, just wearing different clothes. Natural, realistic lighting, no text or watermark.`;
+  try {
+    const resp = await fetch('/api/generate-image', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt, photoBase64, photoMime })
+    });
+    if (!resp.ok) return null;
+    const data = await resp.json();
+    return data.image || null;
+  } catch (e) {
+    return null;
+  }
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+
+styleBtn.addEventListener('click', styleMe);
+</script>
+
+</body>
+</html>

@@ -1,0 +1,3 @@
+# No external packages needed -- khayal_proxy.py only uses Python's
+# standard library. This file exists because some hosting platforms
+# (like Render) expect a requirements.txt to be present.

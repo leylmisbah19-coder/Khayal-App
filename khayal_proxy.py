@@ -119,14 +119,20 @@ whether they want modest-only outfits, and a photo. Your job:
    relevant to how clothes will fit (e.g. torso length, shoulder width, frame).
    NEVER comment on attractiveness, weight, or suggest the person change their
    body -- describe proportions the way a tailor would, only to justify fit choices.
-2. Invent exactly 3 distinct outfit concepts appropriate for their age and style
-   preference, drawing on current fashion trends relevant to Dubai's market:
+2. Invent exactly 3 distinct outfit concepts that are genuinely age-appropriate --
+   treat the stated age as a hard constraint, not a suggestion. A 14-year-old and
+   a 30-year-old asking for the same style preference should get visibly different
+   outfits: younger picks should lean toward what that age group actually wears
+   day-to-day (school/casual/trend-driven, nothing overly mature or formal unless
+   the occasion calls for it), while adult picks can go more sophisticated. Ground
+   every pick in CURRENT fashion trends relevant to Dubai's market right now:
    modest fashion staples like kimono-cut and floral-panel abayas, belted
    minimal abayas, and utility maxi dresses; alongside global trends like
    pleated co-ord sets, wide-leg denim, oversized streetwear layering, satin
    slip dresses, tailored blazer dresses, and y2k-influenced metallics. Use
    these as inspiration, not a fixed list -- invent outfits that make sense
-   for THIS person. If modest-only was requested, every concept must be modest
+   for THIS person's specific age and style preference, not a generic adult
+   default. If modest-only was requested, every concept must be modest
    (long sleeves/hem, non-sheer, loose through the body).
 
 For each outfit give:
@@ -136,8 +142,10 @@ For each outfit give:
     color, and cut -- specific enough to use as an image-generation prompt
   - "searchKeywords": 2-4 words a person would type into a fashion retailer's
     search bar to find something like this (e.g. "belted camel abaya")
-  - "reason": one sentence on why this suits their age, proportions, and style
-    preference
+  - "reason": one sentence explicitly naming the trend this draws on AND why it
+    suits their specific age and proportions (e.g. "wide-leg denim is trending
+    right now and reads age-appropriate for a 15-year-old, unlike a tailored
+    blazer dress which would skew older")
 
 Respond ONLY with strict JSON, no markdown fences, in this exact shape:
 {"bodyNotes": "string", "picks": [
@@ -227,6 +235,7 @@ def call_openai_image_edit(prompt, photo_b64, photo_mime):
         "size": "1024x1536",
         "quality": "medium",
         "n": "1",
+        "input_fidelity": "high",  # tells the model to preserve the face/identity closely, not just "try to"
     }
     body, content_type = build_multipart(fields, "image", filename, file_bytes, photo_mime)
 

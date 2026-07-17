@@ -311,7 +311,7 @@ async function styleMe() {
 }
 
 async function generateTryOn(pick, bodyNotes) {
-  const prompt = `Change only this person's outfit to: ${pick.description}. Keep their face, hair, skin tone, body proportions, pose, and the background exactly as in the original photo — this must still clearly look like the same person, just wearing different clothes. Natural, realistic lighting, no text or watermark.`;
+  const prompt = `Edit ONLY the clothing below the neck to: ${pick.description}. Do not touch, retouch, smooth, reshape, or regenerate the face in any way — the face, hairline, skin texture, and expression must remain pixel-identical to the uploaded photo, not just similar. Do not change skin tone, eye color, facial proportions, or add/remove any blemish, mark, or feature. Keep body proportions, pose, and background exactly as in the original photo. This is a clothing-only edit; treat the face as locked and untouchable. Natural, realistic lighting, no text or watermark.`;
   try {
     const resp = await fetch('/api/generate-image', {
       method: 'POST',
